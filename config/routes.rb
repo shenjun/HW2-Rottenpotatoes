@@ -3,7 +3,7 @@ Rottenpotatoes::Application.routes.draw do
   # first created -> highest priority.
 
   # Sample of regular route:
-  #   match 'products/:id' => 'catalog#view'
+  match '/movies/:id' => 'MoviesController#show'
   # Keep in mind you can assign values other than :controller and :action
 
   # Sample of named route:
@@ -49,7 +49,7 @@ Rottenpotatoes::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  # root :to => 'welcome#index'
+  root :to => 'MoviesController#index'
 
   # See how all your routes lay out with "rake routes"
 
