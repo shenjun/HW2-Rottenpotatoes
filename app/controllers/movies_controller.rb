@@ -6,37 +6,29 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-  def index
-    session[:ratings] = params[:ratings] if params[:ratings]
-    session[:sort_order] = params[:sort_order] if params[:sort_order]
-
-    # redirect to RESTful path if session contains more info than provided in params
-    if (!params[:ratings] && session[:ratings]) || (!params[:sort_order] && session[:sort_order])
-      redirect_to movies_path(ratings: session[:ratings], sort_order: session[:sort_order])
+def index
+    sort = params[:sort] || session[:sort]
+    case sort
+    when 'title'
+      ordering,@title_header = {:order => :title}, 'hilite'
+    when 'release_date'
+      ordering,@date_header = {:order => :release_date}, 'hilite'
     end
-
-    query_base = Movie
-
-    if session[:ratings]
-      query_base = query_base.scoped(:conditions => { :rating => session[:ratings].keys })
-    end
-
-    if session[:sort_order]
-      query_base = query_base.scoped(:order => session[:sort_order])
-    end
-
-    @movies = query_base.all
-
     @all_ratings = Movie.all_ratings
+    @selected_ratings = params[:ratings] || session[:ratings] || {}
 
-    if session[:ratings]
-      @selected_ratings = session[:ratings]
-    else
-      @selected_ratings = {}
+    if params[:sort] != session[:sort]
+      session[:sort] = sort
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
     end
+
+    if params[:ratings] != session[:ratings] and @selected_ratings != {}
+      session[:sort] = sort
+      session[:ratings] = @selected_ratings
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
+    @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
   end
-
-
 
   def new
     # default: render 'new' template
