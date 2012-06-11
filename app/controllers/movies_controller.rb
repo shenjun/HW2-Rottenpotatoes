@@ -6,9 +6,36 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-def index
+  def index
+    if params[:commit] == 'Refresh'
+      session[:ratings] = params[:ratings]
+    elsif session[:ratings] != params[:ratings]
+      redirect = true
+      params[:ratings] = session[:ratings]
+    end
 
-    @movies = Movie.all
+    if params[:orderby]
+      session[:orderby] = params[:orderby]
+    elsif session[:orderby]
+      redirect = true
+      params[:orderby] = session[:orderby]
+    end
+    
+    @ratings, @orderby = session[:ratings], session[:orderby]
+    if redirect
+      redirect_to movies_path({:orderby=>@orderby, :ratings=>@ratings})
+    elsif
+      columns = {'title'=>'title', 'release_date'=>'release_date'}
+      if columns.has_key?(@orderby)
+        query = Movie.order(columns[@orderby])
+      else
+        @orderby = nil
+        query = Movie
+      end
+      
+      @movies = @ratings.nil? ? query.all : query.find_all_by_rating(@ratings.map { |r| r[0] })
+      @all_ratings = Movie.ratings
+    end
   end
 
   def new
