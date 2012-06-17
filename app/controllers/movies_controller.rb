@@ -16,7 +16,7 @@ class MoviesController < ApplicationController
     end
 	@all_ratings = Movie.all_ratings
     @selected_ratings = params[:ratings] || {}
-    @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
+    @movies = Movie.find(:all, ordering)
   end
 
 
